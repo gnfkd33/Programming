@@ -11,7 +11,7 @@ app.use(express.json());
 
 const dbFile = ".data/db.json";
 
-// 파일 없으면 자동 생성
+// 파일이 없으면 생성
 try {
   await fs.access(dbFile);
 } catch {
@@ -26,7 +26,10 @@ const port = process.env.PORT || 3000;
 
 const start = async () => {
   await db.read();
-  db.data ||= { tasks: [] };
+  if (!db.data) {
+    db.data = { tasks: [] };
+    await db.write(); // 꼭 초기값 저장!
+  }
 
   app.get("/tasks", async (req, res) => {
     await db.read();
