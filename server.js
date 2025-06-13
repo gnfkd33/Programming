@@ -15,7 +15,7 @@ const db = new Low(adapter);
 const port = process.env.PORT || 3000;
 
 const start = async () => {
-  // 디렉토리 및 초기 파일 생성
+  // db.json 파일 없으면 자동으로 생성
   try {
     await fs.access(dbFile);
   } catch {
@@ -24,10 +24,7 @@ const start = async () => {
   }
 
   await db.read();
-  if (!db.data || !db.data.tasks) {
-    db.data = { tasks: [] };
-    await db.write();
-  }
+  db.data ||= { tasks: [] };
 
   app.get("/tasks", async (req, res) => {
     await db.read();
