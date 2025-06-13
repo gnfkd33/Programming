@@ -15,7 +15,6 @@ const db = new Low(adapter);
 const port = process.env.PORT || 3000;
 
 const start = async () => {
-  // db.json 파일 없으면 자동으로 생성
   try {
     await fs.access(dbFile);
   } catch {
