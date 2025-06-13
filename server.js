@@ -10,24 +10,20 @@ app.use(cors());
 app.use(express.json());
 
 const dbFile = ".data/db.json";
-
-// 파일 없으면 생성
-try {
-  await fs.access(dbFile);
-} catch {
-  await fs.mkdir(path.dirname(dbFile), { recursive: true });
-  await fs.writeFile(dbFile, JSON.stringify({ tasks: [] }, null, 2));
-}
-
 const adapter = new JSONFile(dbFile);
 const db = new Low(adapter);
-
 const port = process.env.PORT || 3000;
 
 const start = async () => {
-  await db.read();
+  // 디렉토리 및 초기 파일 생성
+  try {
+    await fs.access(dbFile);
+  } catch {
+    await fs.mkdir(path.dirname(dbFile), { recursive: true });
+    await fs.writeFile(dbFile, JSON.stringify({ tasks: [] }, null, 2));
+  }
 
-  // 이 부분이 중요!!
+  await db.read();
   if (!db.data || !db.data.tasks) {
     db.data = { tasks: [] };
     await db.write();
