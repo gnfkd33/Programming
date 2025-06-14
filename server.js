@@ -2,26 +2,17 @@ import express from "express";
 import cors from "cors";
 import { Low } from "lowdb";
 import { JSONFile } from "lowdb/node";
-import fs from "fs/promises";
-import path from "path";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const dbFile = ".data/db.json";
-const adapter = new JSONFile(dbFile);
+const adapter = new JSONFile(".data/db.json");
 const db = new Low(adapter);
+
 const port = process.env.PORT || 3000;
 
 const start = async () => {
-  try {
-    await fs.access(dbFile);
-  } catch {
-    await fs.mkdir(path.dirname(dbFile), { recursive: true });
-    await fs.writeFile(dbFile, JSON.stringify({ tasks: [] }, null, 2));
-  }
-
   await db.read();
   db.data ||= { tasks: [] };
 
@@ -57,7 +48,7 @@ const start = async () => {
   });
 
   app.listen(port, () => {
-    console.log(`✅ 서버 실행 중! 포트: ${port}`);
+    console.log(`✅ 서버 실행 중: ${port}`);
   });
 };
 
