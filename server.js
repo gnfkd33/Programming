@@ -2,10 +2,19 @@ import express from "express";
 import cors from "cors";
 import { Low } from "lowdb";
 import { JSONFile } from "lowdb/node";
+import { existsSync, mkdirSync, writeFileSync } from "fs";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// .data 디렉토리와 db.json 파일이 없으면 생성
+if (!existsSync(".data")) {
+  mkdirSync(".data");
+}
+if (!existsSync(".data/db.json")) {
+  writeFileSync(".data/db.json", JSON.stringify({ tasks: [] }, null, 2));
+}
 
 const adapter = new JSONFile(".data/db.json");
 const db = new Low(adapter);
