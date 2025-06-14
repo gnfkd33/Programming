@@ -2,32 +2,30 @@ import express from "express";
 import cors from "cors";
 import { Low } from "lowdb";
 import { JSONFile } from "lowdb/node";
-import { existsSync, mkdirSync, writeFileSync } from "fs";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// .data 디렉토리와 db.json 파일이 없으면 생성
-if (!existsSync(".data")) {
-  mkdirSync(".data");
-}
-if (!existsSync(".data/db.json")) {
-  writeFileSync(".data/db.json", JSON.stringify({ tasks: [] }, null, 2));
-}
-
 const adapter = new JSONFile(".data/db.json");
 const db = new Low(adapter);
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 const start = async () => {
   await db.read();
   db.data ||= { tasks: [] };
 
   app.get("/tasks", async (req, res) => {
+    const status = req.query.status;
     await db.read();
-    res.json(db.data.tasks);
+    const tasks = db.data.tasks;
+    const filtered = status === "Done"
+      ? tasks.filter(t => t.done)
+      : status === "Todo"
+      ? tasks.filter(t => !t.done)
+      : tasks;
+    res.json(filtered);
   });
 
   app.post("/tasks", async (req, res) => {
@@ -57,7 +55,7 @@ const start = async () => {
   });
 
   app.listen(port, () => {
-    console.log(`✅ 서버 실행 중: ${port}`);
+    console.log(`✅ 서버 실행 중: http://localhost:${port}`);
   });
 };
 
